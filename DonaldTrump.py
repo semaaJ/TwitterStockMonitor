@@ -1,6 +1,7 @@
 import json
 import tweepy
 import datetime
+import smtplib
 
 
 CONFIG_FILE = "config.json"
@@ -51,6 +52,7 @@ class Twitter(object):
 
     def check_tweets(self):
         '''Checks for a new tweet'''
+        '''If there's a new tweet, returns it to be checked for companies'''
 
         try:
             new_tweet = self.api.user_timeline(screen_name = self.config.TWITTER, count=1)
@@ -61,15 +63,11 @@ class Twitter(object):
                 with open(self.config.NEW_TWEET, "r") as f:
                     old_tweet = f.read().strip()
 
-                if old_tweet == tweet.text:
-                    pass
-                    #this will be a function that is called to wait 20 seconds or so before rechecking.
-                
-                else:    
+                if old_tweet != tweet.text:
                     with open(self.config.NEW_TWEET, "r+") as f:
                         f.write(tweet.text)
 
-                    #function here that will call in finance to check companies
+                    return tweet.text 
 
         except Exception as error:
             self.log.write_to_log("Twitter error: ")
@@ -78,24 +76,74 @@ class Twitter(object):
     def check_mentions(self):
         '''Checks mentions for sign up's via email or twitter
            via "Sign up [email]" '''
+
+        '''@DonaldTrumpStatBot Sign up == Twitter username'''
+        '''@DonalTrumpStatBot Sign up hello@gmail.com == Email'''
+
+        '''@DonaldTrumpStatBot STOP == Twitter'''
+        '''@DonaldTrumpStatBot STOP hello@gmail.com == Email'''
         
         try:
-            mentions = self.api.mentions_timeline(count=3)
+            mentions = self.api.mentions_timeline(count=1)
 
             for mention in mentions:
-                #Checks for email sign up
-                if len(mention.text.split()) > 3:
-                        email = mention.text.split()[3]
+                #unsubscribe feature
+                if "STOP" in mention.text:
+                    #email
+                    if len(mention.text.split()) == 3:
+
+                        email = mention.text.split()[2]
+                        email_list = []
                         
-                        with open("emails.txt", "r+") as f:
-                            if email not in f:
-                                f.write("{} \n".format(email))
+                        with open("emails.txt", "r") as f:
+                            lines = f.read().split()
+                            
+                            if email in lines:
+                                for line in lines:
+                                    if line.strip() != email:
+                                        email_list.append(line.strip())
 
-                else:
-                    with open("twitter_names.txt", "r+") as f:
+                            with open("emails.txt", "w") as f:
+                                for item in email_list:
+                                    f.write("{} \n".format(item))
+
+                    else:
+
                         twitter_name = mention.user.screen_name
+                        twitter_list = []
+                        
+                        with open("twitter_names.txt", "r") as f:
+                            lines = f.read().split()
+                            
+                            if twitter_name in lines:
+                                for line in lines:
+                                    if line.strip() != twitter_name:
+                                        twitter_list.append(line.strip())
 
-                        if mention.user.screen_name not in f:
+                            with open("twitter_names.txt", "w") as f:
+                                for item in twitter_list:
+                                    f.write("{} \n".format(item))
+                                    
+                #Checks for email sign up
+                #Adds email to subscription
+                elif len(mention.text.split()) > 3:
+                    email = mention.text.split()[3]
+
+                    with open("emails.txt", "r+") as f:
+                        lines = f.read().split()
+
+                        if email not in lines:
+                            f.write("{} \n".format(email.strip()))
+        
+
+                #Adds twitter username to subscription
+                else:
+                    twitter_name = mention.user.screen_name
+                    
+                    with open("twitter_names.txt", "r+") as f:
+                        lines = f.read()
+                        
+                        if mention.user.screen_name not in lines:
                             f.write("{} \n".format(twitter_name))
                     
                     
@@ -107,22 +155,65 @@ class Twitter(object):
 class Finance(object):
     #checking if Donald's tweets include companies
     #If they are, put them into a file for another script to monitor their stocks for 7 days
-    def __init__(self):
-        pass
+    def __init__(self, tweet):
+        self.tweet = tweet
     
-    def check_companies(self, company_list):
-        pass
+    def check_companies(self):
+        '''Checks list of companies with Trump's tweet
+           seeing if any companies are listed in his tweet'''
+
+        matches = []
+        
+        with open("companies.txt", "r") as f:
+            for line in f:
+                for word in self.tweet.split():
+                    if word.lower() == line.strip():
+                        matches.append(line)
+
+        print(matches)
+        return matches
+
+            
 
 
-class Email(object):
+class Output(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, matches):
+        self.config = Config()
+        self.twitter = Twitter()
+        self.matches = matches
+
+
+    def tweet(self):
+        for item in self.matches:
+            self.twitter.api.update_status('''Yelp, looks like a good time to take a look at
+                                              your shares in {}! Trump just tweeted about them...'''.format(item)
+    
+
+    def email(self):
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login('weather4castbot@gmail.com', 'cosmos2011')
+        server.sendmail('weather4castbot@gmail.com', emails, message)
+        server.quit()
+        
+
+
+    def subscribe(self):
+        time = int("{:%M}".format(datetime.datetime.now()))
+
+        if time == 00:
+            self.twitter.api.update_status('''You can subscribe to be notified of Donald's activities via:
+                                              "@DonaldTrumpStatsBot Sign up" or "@DonaldTrumpStatsBot Sign up [your-email]"'''
+            
 
 
 def main():
-    Twitter().check_tweets()
     Twitter().check_mentions()
+
+    #if a new tweet is returned
+    #if Twitter().check_tweets():
+    #    Finance(tweets).check_companies()
 
 
 if __name__ == "__main__":
