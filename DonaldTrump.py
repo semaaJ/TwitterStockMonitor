@@ -1,5 +1,6 @@
 import json
 import tweepy
+import datetime
 
 
 CONFIG_FILE = "config.json"
@@ -24,12 +25,16 @@ class Config(object):
         COMPANIES = config["Files"]["Companies"]
         NEW_TWEET = config["Files"]["NewTweet"]
 
+
+
 class Log():
+
     config = Config()
 
-    def write_to_log(input):
-        with open(config.LOG, "r+") as f:
-            f.write(input)
+    def write_to_log(self, input):
+        with open(self.config.LOG, "r+") as f:
+            f.write("{} {:%d-%m-%Y %H:%M:%S}".format(input, datetime.datetime.now()))
+
 
 
 class Twitter(object):
@@ -46,6 +51,7 @@ class Twitter(object):
 
     def check_tweets(self):
         '''Checks for a new tweet'''
+
         try:
             new_tweet = self.api.user_timeline(screen_name = self.config.TWITTER, count=1)
 
@@ -66,25 +72,58 @@ class Twitter(object):
                     #function here that will call in finance to check companies
 
         except Exception as error:
-            self.log.write_to_log("Twitter error: {}".format(error))
+            self.log.write_to_log("Twitter error: ")
 
 
-    def tweet(self):
-        pass
+    def check_mentions(self):
+        '''Checks mentions for sign up's via email or twitter
+           via "Sign up [email]" '''
         
+        try:
+            mentions = self.api.mentions_timeline(count=3)
+
+            for mention in mentions:
+                #Checks for email sign up
+                if len(mention.text.split()) > 3:
+                        email = mention.text.split()[3]
+                        
+                        with open("emails.txt", "r+") as f:
+                            if email not in f:
+                                f.write("{} \n".format(email))
+
+                else:
+                    with open("twitter_names.txt", "r+") as f:
+                        twitter_name = mention.user.screen_name
+
+                        if mention.user.screen_name not in f:
+                            f.write("{} \n".format(twitter_name))
+                    
+                    
+
+        except ValueError as error:
+            self.log.write_to_log("Twitter error: ")
+
 
 class Finance(object):
     #checking if Donald's tweets include companies
     #If they are, put them into a file for another script to monitor their stocks for 7 days
+    def __init__(self):
+        pass
     
-    pass
+    def check_companies(self, company_list):
+        pass
 
-class Output(object):
-    #Include email, tweet maybe?
-    pass
+
+class Email(object):
+
+    def __init__(self):
+        pass
+
 
 def main():
     Twitter().check_tweets()
+    Twitter().check_mentions()
+
 
 if __name__ == "__main__":
     main()
