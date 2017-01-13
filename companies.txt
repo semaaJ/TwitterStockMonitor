@@ -726,7 +726,7 @@ fluor
 focus media information technology
 foncière des régions
 foot locker
-ford motor
+ford
 formosa chemicals
 formosa petrochemical
 formosa plastics
@@ -1203,8 +1203,8 @@ metro
 metro group
 metropolitan bank &amp; trust
 mettler-toledo international
-michael kors holdings
-michelin group
+michael kors
+michelin
 microchip technology
 micron technology
 microsoft
@@ -1212,15 +1212,7 @@ midea group
 migdal insurance
 millicom international
 minato bank
-mitsubishi chemical
-mitsubishi corp
-mitsubishi electric
-mitsubishi estate
-mitsubishi heavy industries
-mitsubishi materials
-mitsubishi motors
-mitsubishi ufj financial
-mitsubishi ufj lease
+mitsubishi
 mitsui
 mitsui chemicals
 mitsui fudosan
@@ -1807,10 +1799,7 @@ toshiba
 total
 total system services
 towngas
-toyota boshoku
-toyota industries
-toyota motor
-toyota tsusho
+toyota
 tractor supply
 transcanada
 transdigm group
