@@ -156,7 +156,7 @@ class Twitter(object):
 
 
 
-class Finance(object):
+class Companies(object):
     
     def __init__(self, tweet):
         self.config = Config()
@@ -254,7 +254,7 @@ def main():
     #Checks for new tweets
     new_tweet = Twitter().check_tweets()
     #checks to see if any words in company list
-    matches = Finance(new_tweet).check_companies()
+    matches = Companies(new_tweet).check_companies()
 
     #if a new tweet is returned
     if new_tweet:
