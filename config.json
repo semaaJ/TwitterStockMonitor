@@ -1,0 +1,24 @@
+{
+    "Files":{
+        "Emails": "emails.txt",
+        "Log": "log.txt",
+        "TwitterNames": "twitter_names.txt",
+        "Companies": "companies.txt",
+        "NewTweet": "new_tweet.txt",
+        "CompaniesToMonitor": "monitor.json"
+    },
+    
+    "Twitter-Auth":{
+        "ConsumerKey": "",
+        "ConsumerSecret": "",
+        "AccessToken": "",
+        "AccessTokenSecret": ",
+        "Twitter": "realDonaldTrump"
+    },
+    
+    "Email-Info":{
+        "Email": "",
+        "Password": ""
+        }
+    
+}
