@@ -190,7 +190,6 @@ class Companies(object):
                         matches.append(line.strip())
     
 
-        #dictionary to be used in monitor.py
         with open(self.config.MONITOR, "r") as f:
             company_dict = json.load(f)
 
