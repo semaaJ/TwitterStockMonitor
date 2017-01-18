@@ -1,16 +1,17 @@
 {
-	"name": "trump-stock-monitor",
-	"version": "0.0.0",
-	"description": "Monitors stock prices of companies after mentioned by Trump on Twitter.",
-	"author": "Drew McArthur, Mhyles",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/DrewMcArthur/DonaldTrumpStockMonitor"
-	},
-	"bugs": {
-		"url": "https://github.com/DrewMcArthur/DonaldTrumpStockMonitor/issues"
-	},
-	"dependencies": {
-	},
-	"license": "MIT"
+  "name": "trump-stock-monitor",
+  "version": "0.0.0",
+  "description": "Monitors stock prices of companies after mentioned by Trump on Twitter.",
+  "author": "Drew McArthur, Mhyles",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DrewMcArthur/DonaldTrumpStockMonitor"
+  },
+  "bugs": {
+    "url": "https://github.com/DrewMcArthur/DonaldTrumpStockMonitor/issues"
+  },
+  "dependencies": {
+    "express": "^4.14.0"
+  },
+  "license": "MIT"
 }
