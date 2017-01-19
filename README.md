@@ -19,5 +19,5 @@ pip install bs4
 
 ## Setup
 - You must first set up a [Twitter APP](https://themepacific.com/how-to-generate-api-key-consumer-token-access-key-for-twitter-oauth/994/)
-- You need to set up an email and make sure that you account allows [less secure apps](https://support.google.com/accounts/answer/6010255?hl=en)
+- You need to set up an email and make sure that your account allows [less secure apps](https://support.google.com/accounts/answer/6010255?hl=en)
 - Input this data into the config file and run :)
