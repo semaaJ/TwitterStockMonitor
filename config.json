@@ -9,16 +9,16 @@
     },
     
     "Twitter-Auth":{
-        "ConsumerKey": "",
-        "ConsumerSecret": "",
-        "AccessToken": "",
-        "AccessTokenSecret": ",
+        "ConsumerKey": "CONSUMER KEY GOES HERE",
+        "ConsumerSecret": "CONSUMER SECRET GOES HERE",
+        "AccessToken": "ACCESS TOKEN GOES HERE",
+        "AccessTokenSecret": "ACCESS TOKEN SECRET GOES HERE",
         "Twitter": "realDonaldTrump"
     },
     
     "Email-Info":{
-        "Email": "",
-        "Password": ""
+        "Email": "EMAIL GOES HERE",
+        "Password": "PASSWORD TO THE EMAIL GOES HERE"
         }
     
 }
