@@ -15,7 +15,6 @@ These can be installed via:
 pip install selenium
 pip install yahoo_finance
 pip install bs4
-
 ```
 
 ## Setup
