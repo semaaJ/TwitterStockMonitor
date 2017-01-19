@@ -10,7 +10,6 @@ var fs = require('fs');
 
 // routes
 app.set('views', __dirname + "/public");
-app.set('view engine', 'pug');
 
 app.use(express.static(__dirname + '/public'));
 
