@@ -8,13 +8,11 @@ I noticed that when Trump mentioned Toyota in a negative light their shares dipp
 For this you will need:
 - Selenium
 - Yahoo_finance 
-- BeautifulSoup
 
 These can be installed via:
 ```
 pip install selenium
 pip install yahoo_finance
-pip install bs4
 ```
 
 ## Setup
