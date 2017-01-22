@@ -5,6 +5,7 @@ import tweepy
 import datetime
 import smtplib
 import time
+import sys
 
 from yahoo_finance import Share
 from selenium import webdriver
@@ -365,7 +366,11 @@ def main():
         #if any matches are returned
         if matches:
             Output(matches).tweet()
-            Output(matches).email()
+            #if want the email function
+            if len(sys.argv) > 1:
+                if sys.argv[1] == "email":
+                    Output(matches).email()
+            
 
 
     Twitter().check_mentions()
