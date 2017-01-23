@@ -119,7 +119,6 @@ class Twitter(object):
                         twitter_name_list = tf.open_file(twitter_names_file).split()
 
                         if twitter_name not in twitter_name_list:
-                            # Write to file doesn't work here????
                             twitter_name_list.append(twitter_name)
                             
                             tf.write_to_file_for_loop(twitter_names_file, twitter_name_list)
