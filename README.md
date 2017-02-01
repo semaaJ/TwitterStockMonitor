@@ -4,6 +4,8 @@ If a company is mentioned, the script will tweet and email subscribers.
 
 I noticed that when Trump mentioned Toyota in a negative light their shares dipped heavily, while when Fiat and Ford were mentioned in a positive manner they had an increase in shares. I wanted to create something to visualise this. 
 
+Twitter: https://twitter.com/TrumpShare4Cast
+
 ## Requirements
 For this you will need:
 - Selenium
