@@ -240,17 +240,20 @@ class Companies(object):
 
         tf.write_to_json(company_dict)
 
-    def minus_days(self):
-        company_dict = tf.open_json()
-        
-        for company in company_dict:
-            if company_dict[company]["Days-left"] > 0:
-                company_dict[company]["Days-left"] -= 1
-
-            elif company_dict[company]["Days-left"] == 0:
-                del company_dict[company]
-
-        tf.write_to_json(company_dict)
+##    def minus_days(self):
+##        # copy is used as dict cant change size during iterations
+##        
+##        company_dict = tf.open_json()
+##        copy = tf.open_json()
+##        
+##        for company in company_dict:
+##            if company_dict[company]["Days-left"] > 0:
+##                copy[company]["Days-left"] -= 1
+##
+##            elif company_dict[company]["Days-left"] == 0:
+##                del copy[company]
+##
+##        tf.write_to_json(copy)
 
     def difference_in_shares(self):
         company_dict = tf.open_json()
@@ -358,8 +361,8 @@ def main():
         
 
         # Removes a day from the json file at 4 daily
-        if time_str == "17:00":
-            Companies(placeholder).minus_days()
+##        if time_str == "17:55":
+##            Companies(placeholder).minus_days()
 
 
         time.sleep(30)
