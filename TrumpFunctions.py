@@ -32,4 +32,4 @@ def open_json():
 
 def write_to_json(info):
     with open("./files/monitor.json", "r+") as f:
-        json.dump(info, f)
+        json.dump(info, f, sort_keys = True, indent = 4,ensure_ascii=False)
