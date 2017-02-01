@@ -229,6 +229,7 @@ class Companies(object):
         for company in company_dict:
             try:
                 yahoo = Share(company_dict[company]["Symbol"])
+                yahoo.refresh()
                 share = yahoo.get_price()
 
                 company_dict[company]["Current-share-price"] = float(share)
@@ -241,10 +242,10 @@ class Companies(object):
 
     def minus_days(self):
         company_dict = tf.open_json()
-
+        
         for company in company_dict:
             if company_dict[company]["Days-left"] > 0:
-                company_dict[company]["Days-left"] = company_dict[company]["Days-left"] - 1
+                company_dict[company]["Days-left"] -= 1
 
             elif company_dict[company]["Days-left"] == 0:
                 del company_dict[company]
@@ -257,14 +258,18 @@ class Companies(object):
         share_difference_dict = {}
 
         for company in company_dict:
-            decrease_in_shares = (company_dict[company]["Current-share-price"]
-                                  / company_dict[company]["Initial-share-price"])
+            share_change = 1.0 - (company_dict[company]["Initial-share-price"] /
+                                  company_dict[company]["Current-share-price"])
 
-            if decrease_in_shares > 1:
-                share_difference_dict[company] = "+{0:.2f}".format(decrease_in_shares - 1)
+            maximum = 1 - (company_dict[company]["Initial-share-price"] /
+                           max(company_dict[company]["Share-price-list"]))
 
-            else:
-                share_difference_dict[company] = "-{0:.2f}".format(1 - decrease_in_shares)
+            share_difference_dict[company] = {}
+            share_difference_dict[company]["Change"] = share_change
+            share_difference_dict[company]["Max"] = max(company_dict[company]["Share-price-list"])
+            share_difference_dict[company]["Max-change"] = maximum
+            share_difference_dict[company]["Initial"] = company_dict[company]["Initial-share-price"]
+            share_difference_dict[company]["Current"] = company_dict[company]["Current-share-price"]
 
         return share_difference_dict
 
@@ -309,8 +314,18 @@ your shares...'.format(",".join(self.matches)))
     def share_output(self):
         # self.matches here == share_difference_dict from difference_in_shares func
         for company in self.matches:
-            self.twitter.api.update_status("Since trump tweeted about {},\
-their shares have changed by {}!".format(company, self.matches[company]))
+            try:
+                self.twitter.api.update_status("{} - Initial Share Price: {} Current Share Price: {} \
+Current change: {:.1%} Max change: {:.1%} (from {} to {})".format(company.capitalize(),
+                                                                  self.matches[company]["Initial"],
+                                                                  self.matches[company]["Current"],
+                                                                  self.matches[company]["Change"],
+                                                                  self.matches[company]["Max-change"],
+                                                                  self.matches[company]["Initial"],
+                                                                  self.matches[company]["Max"]))
+                
+            except Exception as error:
+                tf.write_to_log("Check tweets error: {}".format(error))
 
 
 def main():
@@ -332,20 +347,20 @@ def main():
         # This is needed to substitute in the classes init
         placeholder = "x"
 
-        # Gets the current share of the company every hour
-        minute = datetime.datetime.now().minute
-        if minute == 00:
-            Companies(placeholder).get_current_shares()
-
-        # Removes a day from the json file at 4 daily
-        hour = datetime.datetime.now().hour
-        if hour == 16:
-            Companies(placeholder).minus_days()
+        # Gets the current share of the company every refresh
+        Companies(placeholder).get_current_shares()
 
         # Outputs the difference in shares
-        if hour == 18:
+        time_str = "{:%H:%M}".format(datetime.datetime.now())
+        if time_str == "18:00":
             share_dict = Companies(placeholder).difference_in_shares()
             Output(share_dict).share_output()
+        
+
+        # Removes a day from the json file at 4 daily
+        if time_str == "17:00":
+            Companies(placeholder).minus_days()
+
 
         time.sleep(30)
         print(datetime.datetime.now())
