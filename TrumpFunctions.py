@@ -4,7 +4,7 @@ import json
 
 
 def write_to_log(input):
-    with open("./files/log.txt", "r+") as f:
+    with open("./files/log.txt", "w") as f:
         f.write("{} {:%d-%m-%Y %H:%M:%S}".format(input, datetime.datetime.now()))
 
 
@@ -14,7 +14,7 @@ def open_file(file_name):
 
 
 def write_to_file(file_name, input):
-    with open(file_name, "r+") as f:  # possibly try "a" here
+    with open(file_name, "w") as f:  # possibly try "a" here
         f.write(input)
 
 
@@ -31,5 +31,5 @@ def open_json():
 
 
 def write_to_json(info):
-    with open("./files/monitor.json", "r+") as f:
+    with open("./files/monitor.json", "w") as f:
         json.dump(info, f, sort_keys = True, indent = 4,ensure_ascii=False)
