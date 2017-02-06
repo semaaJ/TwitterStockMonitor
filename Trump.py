@@ -136,9 +136,9 @@ class Companies(object):
         
     # This will be run immediately after a new tweet is posted
     def check_companies(self):
-        """Checks list of companies with Trump's tweet
+        '''Checks list of companies with Trump's tweet
            seeing if any companies are listed in his tweet.
-           Inputs matches into a json"""
+           Inputs matches into a json'''
 
         matches = []
         punc = ["!", ",", ".", ":", ";"]
@@ -153,16 +153,19 @@ class Companies(object):
                     matches.append(line.strip())
 
         company_dict = tf.open_json()
-
+        comp_d = {}
+        
         # Information that is needed by get_initial/current
         for company in matches:
-                company_dict[company] = {}
-                company_dict[company]["Symbol"] = "unknown"
-                company_dict[company]["Date-mentioned"] = "{:%d-%m-%Y %H:%M:%S}".format(datetime.datetime.now())
-                company_dict[company]["Days-left"] = 7
-                company_dict[company]["Initial-share-price"] = 1
-                company_dict[company]["Current-share-price"] = 1
-                company_dict[company]["Share-price-list"] = []
+                comp_d[company] = {}
+                comp_d[company]["Symbol"] = "unknown"
+                comp_d[company]["Date-mentioned"] = "{:%d-%m-%Y %H:%M:%S}".format(datetime.datetime.now())
+                comp_d[company]["Days-left"] = 7
+                comp_d[company]["Initial-share-price"] = 1
+                comp_d[company]["Current-share-price"] = 1
+                comp_d[company]["Share-price-list"] = []
+
+        company_dict.update(comp_d)
 
         tf.write_to_json(company_dict)
         return matches
@@ -240,20 +243,24 @@ class Companies(object):
 
         tf.write_to_json(company_dict)
 
-##    def minus_days(self):
-##        # copy is used as dict cant change size during iterations
-##        
-##        company_dict = tf.open_json()
-##        copy = tf.open_json()
-##        
-##        for company in company_dict:
-##            if company_dict[company]["Days-left"] > 0:
-##                copy[company]["Days-left"] -= 1
-##
-##            elif company_dict[company]["Days-left"] == 0:
-##                del copy[company]
-##
-##        tf.write_to_json(copy)
+    def minus_days(self):
+        '''Takes away a day from the "Days-Left",
+           removes from monitor.json if == 0'''
+        
+        company_dict = tf.open_json()
+        remove_list = []
+        
+        for company in company_dict:
+            if company_dict[company]["Days-left"] > 0:
+                company_dict[company]["Days-left"] -= 1
+
+            elif company_dict[company]["Days-left"] == 0:
+                remove_list.append(company)
+
+        for company in remove_list:
+            del company_dict[company]
+            
+        tf.write_to_json(company_dict)
 
     def difference_in_shares(self):
         company_dict = tf.open_json()
@@ -293,6 +300,7 @@ Trump just tweeted about them...".format(item.upper()))  # Messy fix this
             twitter_users = tf.open_file(twitter_names_file).split()
 
             for user in twitter_users:
+                time.sleep(2)
                 self.twitter.api.send_direct_message(screen_name=user, text="Donald just tweeted about {}. \
 Might be time to check your shares...".format(",".join(self.matches)))  # This is messy needs to be fixed
 
@@ -328,7 +336,8 @@ Current change: {:.1%} Max change: {:.1%} (from {} to {})".format(company.capita
                                                                   self.matches[company]["Max"]))
                 
             except Exception as error:
-                tf.write_to_log("Check tweets error: {}".format(error))
+                tf.write_to_log("Share_output error: {}".format(error))
+                                                                                                
 
 
 def main():
@@ -361,8 +370,8 @@ def main():
         
 
         # Removes a day from the json file at 4 daily
-##        if time_str == "17:55":
-##            Companies(placeholder).minus_days()
+        if time_str == "19:20":
+            Companies(placeholder).minus_days()
 
 
         time.sleep(30)
