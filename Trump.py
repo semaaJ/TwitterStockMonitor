@@ -11,12 +11,12 @@ from yahoo_finance import Share
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
-twitter_names_file = "./files/twitter_names.txt"
-companies_file = "./files/companies.txt"
-email_file = "./files/emails.txt"
-monitor_file = "./files/monitor.json"
-new_tweet_file = "./files/new_tweet.txt"
-config = "./files/config.json"
+twitter_names_file = "./Files/twitter_names.txt"
+companies_file = "./Files/companies.txt"
+email_file = "./Files/emails.txt"
+monitor_file = "./Files/monitor.json"
+new_tweet_file = "./Files/new_tweet.txt"
+config = "./Files/config.json"
 
 
 # Parsing the config information
