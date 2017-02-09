@@ -141,7 +141,7 @@ class Companies(object):
            Inputs matches into a json'''
 
         matches = []
-        punc = ["!", ",", ".", ":", ";"]
+        punc = ["!", ",", ".", ":", ";", "@"]
 
         for item in punc:
             if item in self.tweet:
