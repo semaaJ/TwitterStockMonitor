@@ -14,7 +14,7 @@ from selenium.webdriver.common.keys import Keys
 twitter_names_file = "./Files/twitter_names.txt"
 companies_file = "./Files/companies.txt"
 email_file = "./Files/emails.txt"
-monitor_file = "./Fles/monitor.json"
+monitor_file = "./Files/monitor.json"
 new_tweet_file = "./Files/new_tweet.txt"
 config = "./Files/config.json"
 
