@@ -20,7 +20,7 @@ LOG = config["Files"]["Log"]
 EMAILS = config["Files"]["Emails"]
 TWITTER_NAMES = config["Files"]["Twitter"]
 COMPANIES = config["Files"]["Companies"]
-NEW_TWEET = config["Files"]["NewTweet"]
+GENERIC = config["Files"]["Generic"]
 MONITOR = config["Files"]["CompaniesToMonitor"]
 
 # Boolean value
@@ -39,10 +39,11 @@ TWITTER_HANDLES = config["Twitter-Auth"]["Handles"]
 
 
 class Twitter(object):
-    def __init__(self):
+    def __init__(self, handle=''):
+        self.handle = handle
+
         auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_KEY_SECRET)
         auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-
         self.api = tweepy.API(auth)
 
     def check_tweets(self):
@@ -51,15 +52,13 @@ class Twitter(object):
            class to see if a company is contained in it"""
 
         try:
-            new_tweet = self.api.user_timeline(screen_name='JohnFreakingSmi', count=1)
+            new_tweet = self.api.user_timeline(screen_name=self.handle, count=1)
 
             for tweet in new_tweet:  # Need to find a fix for this loop
-                old_tweet = utils.open_file(NEW_TWEET).strip()
-                print(old_tweet)  # Temporary
-                print(tweet.text)  # Temporary
+                old_tweet = utils.open_file(f'{GENERIC}{self.handle}.txt').strip()
 
                 if old_tweet != tweet.text.encode('utf8'):
-                    utils.write_to_file(NEW_TWEET, tweet.text)
+                    utils.write_to_file(f'{GENERIC}{self.handle}.txt', tweet.text)
                     return tweet.text.encode('utf8')
 
         except tweepy.TweepError as error:
@@ -349,7 +348,7 @@ def main():
 
     while True:
         for handle in TWITTER_HANDLES:
-            twitter = Twitter()
+            twitter = Twitter(handle)
             new_tweet = twitter.check_tweets()
 
             # Checks if a new tweet has been posted
