@@ -1,0 +1,22 @@
+{
+    "Email-Info": {
+        "Email": "YOUR EMAIL",
+        "Password": "YOUR PASSWORD"
+    },
+    "Files": {
+        "Companies": "./Files/companies.txt",
+        "CompaniesToMonitor": "./Files/monitor.json",
+        "Emails": "./Files/emails.txt",
+        "InitialStart": true,
+        "Log": "./Files/log.txt",
+        "NewTweet": "./Files/new_tweet.txt",
+        "Twitter": "./Files/twitter_names.txt"
+    },
+    "Twitter-Auth": {
+        "AccessToken": "YOUR ACCESS TOKEN",
+        "AccessTokenSecret": "YOUR ACCESS TOKEN SECRET",
+        "ConsumerKey": "YOUR CONSUMER KEY",
+        "ConsumerSecret": "YOUR CONSUMER SECRET",
+        "Handles": []
+    }
+}
