@@ -1,2 +1,2 @@
 # TwitterStockMonitor
-Currently being updated. Don't use until finished. 
+Currently being updated. This is broken, don't use until fully updated. 
