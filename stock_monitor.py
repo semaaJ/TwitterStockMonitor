@@ -150,7 +150,7 @@ def check_for_companies(tweet, handle):
     for company in matches:
         comp_d[company] = {}
         comp_d[company]["Date-mentioned"] = "{:%d-%m-%Y %H:%M:%S}".format(datetime.datetime.now())
-        comp_d[company]["Mentioned by"] = handle
+        comp_d[company]["Handle"] = handle
         comp_d[company]["Tweet"] = tweet
         comp_d[company]["Days-left"] = 7
         comp_d[company]["Symbol"] = "unknown"
@@ -263,10 +263,6 @@ def minus_days():
 
     utils.write_to_json(MONITOR, company_dict)
 
-    
-##################################
-#       OUTPUT FUNCTIONS         #
-##################################
 
 def tweet(handle, matches):
     """Tweets and DMs the company that has been mentioned"""
@@ -326,6 +322,8 @@ def share_output():
                               f'Max Change: {company["Max-change"]} '
                               )
 
+            # This is giving errors, can't pass company["Max-change"] within {}
+
         except tweepy.TweepError as error:
             utils.write_to_log(f'Twitter output Error: {error}')
 
@@ -353,19 +351,16 @@ def initial_start():
 
 
 def main():
-    global TWITTER_HANDLES
-
     # Checks if this is the first time running the script
     # Allows the user to choose the Twitter Handles to follow
     # Sets the TWITTER_HANDLES which is an empty list, to the new updated list
     if INITIAL_START:
-        handles = initial_start()
-        TWITTER_HANDLES = handles
+        TWITTER_HANDLES = initial_start()
 
     # Sets up jobs for schedule to handle
 
     schedule.every().day.at("16:00").do(minus_days)
-    schedule.every().day.at("18:00").do(share_output)
+    schedule.every().day.at("18:08").do(share_output)
 
     while True:
         for handle in TWITTER_HANDLES:
