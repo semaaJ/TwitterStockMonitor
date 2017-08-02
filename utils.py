@@ -3,6 +3,7 @@ import datetime
 import json
 
 
+# can be done with logging instead
 def write_to_log(data):
     with open("./files/log.txt", "w") as f:
         f.write("{} {:%d-%m-%Y %H:%M:%S}".format(data, datetime.datetime.now()))
@@ -35,6 +36,7 @@ def write_to_json(file_name, data):
         json.dump(data, f, sort_keys=True, indent=4, ensure_ascii=False)
 
 
+# remove
 def find(array, target):
     lo = 0
     hi = len(array) - 1
@@ -52,19 +54,3 @@ def find(array, target):
 
     return False
 
-
-def initial_start():
-    print("Welcome to the Twitter Stock Monitor!")
-    twitter_handles = input("Please enter the Twitter handles you want this bot to follow, separated by spaces: \n")
-
-    json_data = open_json("./Files/config.json")
-
-    json_data["Twitter-Auth"]["Handles"] = twitter_handles.split()
-    json_data["Files"]["InitialStart"] = False
-
-    write_to_json("./Files/config.json", json_data)
-
-    print(f'Thank you! This bot will now begin to monitor: {twitter_handles}')
-    print("These can be edited anytime via the config\n\n\n")
-
-    return twitter_handles.split()
