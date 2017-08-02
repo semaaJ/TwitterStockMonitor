@@ -263,6 +263,10 @@ def minus_days():
 
     utils.write_to_json(MONITOR, company_dict)
 
+    
+##################################
+#       OUTPUT FUNCTIONS         #
+##################################
 
 def tweet(handle, matches):
     """Tweets and DMs the company that has been mentioned"""
