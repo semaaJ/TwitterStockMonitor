@@ -7,10 +7,11 @@
         "Companies": "./Files/companies.txt",
         "CompaniesToMonitor": "./Files/monitor.json",
         "Emails": "./Files/emails.txt",
+        "Generic": "./Files/LatestTweets/",
         "InitialStart": true,
         "Log": "./Files/log.txt",
-        "NewTweet": "./Files/new_tweet.txt",
         "Twitter": "./Files/twitter_names.txt"
+        
     },
     "Twitter-Auth": {
         "AccessToken": "YOUR ACCESS TOKEN",
