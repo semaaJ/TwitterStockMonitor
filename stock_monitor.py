@@ -6,6 +6,7 @@ import utils
 import tweepy
 import smtplib
 import schedule
+import logging
 import datetime
 import urllib.request
 import urllib.error
@@ -37,6 +38,9 @@ ACCESS_TOKEN = config["Twitter-Auth"]["AccessToken"]
 ACCESS_TOKEN_SECRET = config["Twitter-Auth"]["AccessTokenSecret"]
 TWITTER_HANDLES = config["Twitter-Auth"]["Handles"]
 
+# Logging setup
+logging.basicConfig(filename='./Files/log.txt', level=logging.DEBUG)
+
 
 ##################################
 #       TWITTER FUNCTIONS        #
@@ -56,17 +60,17 @@ def check_tweets(handle):
         new_tweet = api.user_timeline(screen_name=handle, count=1)
 
         for tweet in new_tweet:  # Need to find a fix for this loop
-            old_tweet = utils.open_file(f'{GENERIC}{handle}.txt').strip()
+            old_tweet = utils.open_file(f'{GENERIC}{handle}.txt')
 
             print(old_tweet)
             print(tweet.text)
 
-            if old_tweet != tweet.text.encode('utf8'):
+            if old_tweet != tweet.text:
                 utils.write_to_file(f'{GENERIC}{handle}.txt', tweet.text)
-                return tweet.text.encode('utf8')
+                return tweet.text
 
     except tweepy.TweepError as error:
-        utils.write_to_log(f'Error checking for new tweets: {error}')
+        logging.debug(f'Error checking the tweets: {error}')
 
 
 def check_mentions():
@@ -116,7 +120,7 @@ def check_mentions():
                         utils.append_to_file(TWITTER_NAMES, twitter_name)
 
     except tweepy.TweepError as error:
-        utils.write_to_log(f'Error checking mentions: {error}')
+        logging.debug(f'Error checking the mentions: {error}')
 
 
 ##################################
@@ -127,8 +131,6 @@ def check_for_companies(tweet, handle):
     """Checks list of companies with Trump's tweet
        seeing if any companies are listed in his tweet.
        Inputs matches into monitor.json"""
-
-    tweet = tweet.decode('utf8')
 
     matches = []
     punc = ("!", ",", ".", ":", ";", "@", "?", "(", ")")
@@ -183,7 +185,7 @@ def get_initial_company_info():
                     company_dict[company]["Symbol"] = d['items'][0]['symbol']
 
             except urllib.error.HTTPError as error:
-                utils.write_to_log(f'Error opening URL: {error}')
+                logging.debug(f'Error with URLLIB: {error}')
 
         # Gets initial share price
         if company_dict[company]["Initial-share-price"] == 1:
@@ -210,13 +212,14 @@ def get_current_shares():
             company_dict[company]["Current-share-price"] = float(share)
             company_dict[company]["Share-price-list"].append(float(share))
 
-        except ValueError:
+        except TypeError as error:
             # yahoo.get_price() will return None if an error occurs
-            print("Could not add to the Current share/Share price list")
+            logging.debug(f'Error with yahoo_finance: {error}')
 
     utils.write_to_json(MONITOR, company_dict)
 
 
+# This can be removed if I edit current_shares with this info
 def difference_in_shares():
     """Finds the difference in shares.
        Creates a dict to be used by Output"""
@@ -238,6 +241,7 @@ def difference_in_shares():
         share_difference_dict[company]["Max-change"] = maximum
         share_difference_dict[company]["Initial"] = company_dict[company]["Initial-share-price"]
         share_difference_dict[company]["Current"] = company_dict[company]["Current-share-price"]
+        share_difference_dict[company]["Handle"] = company_dict[company]["Handle"]
 
     return share_difference_dict
 
@@ -264,6 +268,11 @@ def minus_days():
     utils.write_to_json(MONITOR, company_dict)
 
 
+##################################
+#       OUTPUT FUNCTIONS         #
+##################################
+
+
 def tweet(handle, matches):
     """Tweets and DMs the company that has been mentioned"""
 
@@ -282,7 +291,7 @@ def tweet(handle, matches):
                                          f'Might be time to check your shares!')
 
     except tweepy.TweepError as error:
-        utils.write_to_log(f'Error tweeting: {error}')
+        logging.debug(f'Error tweeting: {error}')
 
 
 def email(handle, matches):
@@ -302,30 +311,28 @@ def email(handle, matches):
         server.quit()
 
     except smtplib.SMTPResponseException as error:
-        utils.write_to_log(f'Email error: {error}')
+        logging.debug(f'Email error: {error}')
 
 
 def share_output():
     """Calls difference_in_shares from the Companies module,
         Outputs the data to twitter."""
 
-    share_difference_dict = difference_in_shares()
+    share_dict = difference_in_shares()
 
-    for company in share_difference_dict:
+    for company in share_dict:
         try:
             # If you're following one person, this can be changed to look better
             # Remove "[Mentioned by: {company["Handle"]}" in the first line.
-            api.update_status(f'{company} [Mentioned by: {company["Handle"]} - '
-                              f'Initial Share Price: {company["Initial"]} '
-                              f'Current Share Price: {company["Current"]}'
-                              f'Change: {company["Change"]}'
-                              f'Max Change: {company["Max-change"]} '
+            api.update_status(f'{company.capitalize()} Mentioned by: {share_dict[company]["Handle"]}  '
+                              f'Initial Share Price: {share_dict[company]["Initial"]:.2f} '
+                              f'Current Share Price: {share_dict[company]["Current"]:.2f} '
+                              f'Change: {share_dict[company]["Change"]:.2f} '
+                              f'Max Change: {share_dict[company]["Max-change"]:.2f}'
                               )
 
-            # This is giving errors, can't pass company["Max-change"] within {}
-
         except tweepy.TweepError as error:
-            utils.write_to_log(f'Twitter output Error: {error}')
+            logging.debug(f'Error tweeting (Shares): {error}')
 
 
 def initial_start():
@@ -355,15 +362,16 @@ def main():
     # Allows the user to choose the Twitter Handles to follow
     # Sets the TWITTER_HANDLES which is an empty list, to the new updated list
     if INITIAL_START:
-        TWITTER_HANDLES = initial_start()
+        handles = initial_start()
+    else:
+        handles = TWITTER_HANDLES
 
     # Sets up jobs for schedule to handle
-
     schedule.every().day.at("16:00").do(minus_days)
-    schedule.every().day.at("18:08").do(share_output)
+    schedule.every().day.at("15:49").do(share_output)
 
     while True:
-        for handle in TWITTER_HANDLES:
+        for handle in handles:
             new_tweet = check_tweets(handle)
 
             # Checks if a new tweet has been posted
