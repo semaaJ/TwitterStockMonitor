@@ -3,12 +3,6 @@ import datetime
 import json
 
 
-# can be done with logging instead
-def write_to_log(data):
-    with open("./files/log.txt", "w") as f:
-        f.write("{} {:%d-%m-%Y %H:%M:%S}".format(data, datetime.datetime.now()))
-
-
 def open_file(file_name):
     with open(file_name, "r") as f:
         return f.read()
@@ -36,7 +30,6 @@ def write_to_json(file_name, data):
         json.dump(data, f, sort_keys=True, indent=4, ensure_ascii=False)
 
 
-# remove
 def find(array, target):
     lo = 0
     hi = len(array) - 1
