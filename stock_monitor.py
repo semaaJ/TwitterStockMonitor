@@ -248,7 +248,7 @@ def difference_in_shares():
     return share_difference_dict
 
 
-def minus_days():
+def add_days():
     """Adds a day from the "Day",
        removes from monitor.json if day is 7"""
 
@@ -256,18 +256,10 @@ def minus_days():
     remove = []
 
     for company in company_dict:
-        #  Checks if the current day is the last day + 24 hours
-        first_mentioned = company_dict[company]["Date-mentioned"]
-        current_company_day = company_dict[company]["Day"]
-
-        now = datetime.now()
-        time_to_add_day = first_mentioned + timedelta(hours=24 * current_company_day)
-
-        if now > time_to_add_day:
-            if company_dict[company]["Day"] < 7:
-                company_dict[company]["Day"] += 1
-            else:
-                remove.append(company)
+        if company_dict[company]["Day"] < 7:
+            company_dict[company]["Day"] += 1
+        else:
+            remove.append(company)
 
     for company in remove:
         # Do I want to keep a record of all the companies that have been mentioned and their prices???
@@ -377,8 +369,8 @@ def main():
         handles = TWITTER_HANDLES
 
     # Sets up jobs for schedule to handle
-    #schedule.every().day.at("16:00").do(minus_days)
-    schedule.every().day.at("22:25").do(share_output)
+    schedule.every().day.at("07:00").do(add_days)
+    schedule.every().day.at("18:00").do(share_output)
 
     while True:
         for handle in handles:
@@ -408,9 +400,7 @@ def main():
 
         now = datetime.now()
         print(f'Running: {now.hour}:{now.minute} - {now.day}/{now.month}/{now.year}')
-
         time.sleep(30)
-
 
 if __name__ == "__main__":
     main()
