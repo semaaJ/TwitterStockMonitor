@@ -7,11 +7,11 @@ import tweepy
 import smtplib
 import schedule
 import logging
-import datetime
 import urllib.request
 import urllib.error
 
-from yahoo_finance import Share
+from datetime import datetime, timedelta
+from pinance import Pinance
 
 
 config = utils.open_json("./Files/config.json")
@@ -61,9 +61,6 @@ def check_tweets(handle):
 
         for tweet in new_tweet:  # Need to find a fix for this loop
             old_tweet = utils.open_file(f'{GENERIC}{handle}.txt')
-
-            print(old_tweet)
-            print(tweet.text)
 
             if old_tweet != tweet.text:
                 utils.write_to_file(f'{GENERIC}{handle}.txt', tweet.text)
@@ -149,16 +146,17 @@ def check_for_companies(tweet, handle):
     comp_d = {}
 
     # Information that is needed by get_initial/current
+    # Fix error: If a company is mentioned that is already in the json, it overwrites it.
     for company in matches:
         comp_d[company] = {}
-        comp_d[company]["Date-mentioned"] = "{:%d-%m-%Y %H:%M:%S}".format(datetime.datetime.now())
+        comp_d[company]["Date-mentioned"] = "{:%d-%m-%Y %H:%M:%S}".format(datetime.now())
         comp_d[company]["Handle"] = handle
         comp_d[company]["Tweet"] = tweet
-        comp_d[company]["Days-left"] = 7
+        comp_d[company]["Day"] = 1
         comp_d[company]["Symbol"] = "unknown"
         comp_d[company]["Initial-share-price"] = 1
         comp_d[company]["Current-share-price"] = 1
-        comp_d[company]["Share-price-list"] = []
+        comp_d[company]["Share-price-list"] = {"1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": []}
 
     company_dict.update(comp_d)
     utils.write_to_json(MONITOR, company_dict)
@@ -189,8 +187,11 @@ def get_initial_company_info():
 
         # Gets initial share price
         if company_dict[company]["Initial-share-price"] == 1:
-            yahoo = Share(company_dict[company]["Symbol"])
-            share = yahoo.get_price()
+            stock = Pinance(company_dict[company]["Symbol"])
+            stock.get_quotes()
+
+            share = stock.quotes_data["LastTradePrice"]
+
             company_dict[company]["Initial-share-price"] = float(share)
             company_dict[company]["Current-share-price"] = float(share)
 
@@ -198,28 +199,28 @@ def get_initial_company_info():
 
 
 def get_current_shares():
-    """Gets current shares, compares it to initial, finds difference.
-       Returns for output to handle"""
+    """Gets current shares, writes updated version back to json"""
 
     company_dict = utils.open_json(MONITOR)
 
     for company in company_dict:
         try:
-            yahoo = Share(company_dict[company]["Symbol"])
-            yahoo.refresh()
-            share = yahoo.get_price()
+            stock = Pinance(company_dict[company]["Symbol"])
+            stock.get_quotes()
 
+            share = stock.quotes_data["LastTradePrice"]
+
+            current_day = str(company_dict[company]["Day"])
             company_dict[company]["Current-share-price"] = float(share)
-            company_dict[company]["Share-price-list"].append(float(share))
+            company_dict[company]["Share-price-list"][current_day].append(float(share))
 
         except TypeError as error:
-            # yahoo.get_price() will return None if an error occurs
+            # Will catch the error if share returns a value other than a float
             logging.debug(f'Error with yahoo_finance: {error}')
 
     utils.write_to_json(MONITOR, company_dict)
 
 
-# This can be removed if I edit current_shares with this info
 def difference_in_shares():
     """Finds the difference in shares.
        Creates a dict to be used by Output"""
@@ -229,15 +230,16 @@ def difference_in_shares():
     share_difference_dict = {}
 
     for company in company_dict:
+        current_day = company_dict[company]["Day"]
+
         share_change = 1.0 - (company_dict[company]["Initial-share-price"] /
                               company_dict[company]["Current-share-price"])
 
         maximum = 1 - (company_dict[company]["Initial-share-price"] /
-                       max(company_dict[company]["Share-price-list"]))
+                       max(company_dict[company]["Share-price-list"][str(current_day)]))
 
         share_difference_dict[company] = {}
         share_difference_dict[company]["Change"] = share_change
-        share_difference_dict[company]["Max"] = max(company_dict[company]["Share-price-list"])
         share_difference_dict[company]["Max-change"] = maximum
         share_difference_dict[company]["Initial"] = company_dict[company]["Initial-share-price"]
         share_difference_dict[company]["Current"] = company_dict[company]["Current-share-price"]
@@ -247,22 +249,30 @@ def difference_in_shares():
 
 
 def minus_days():
-    """Takes away a day from the "Days-Left",
-       removes from monitor.json if == 0"""
+    """Adds a day from the "Day",
+       removes from monitor.json if day is 7"""
 
     company_dict = utils.open_json(MONITOR)
     remove = []
 
     for company in company_dict:
-        if company_dict[company]["Days-left"] > 0:
-            company_dict[company]["Days-left"] -= 1
+        #  Checks if the current day is the last day + 24 hours
+        first_mentioned = company_dict[company]["Date-mentioned"]
+        current_company_day = company_dict[company]["Day"]
 
-        elif company_dict[company]["Days-left"] == 0:
-            remove.append(company)
+        now = datetime.now()
+        time_to_add_day = first_mentioned + timedelta(hours=24 * current_company_day)
+
+        if now > time_to_add_day:
+            if company_dict[company]["Day"] < 7:
+                company_dict[company]["Day"] += 1
+            else:
+                remove.append(company)
 
     for company in remove:
         # Do I want to keep a record of all the companies that have been mentioned and their prices???
-        # Goes here
+        # Create a folder called past mentions, put each company into its own file??
+        # Intel_Mentioned_
         del company_dict[company]
 
     utils.write_to_json(MONITOR, company_dict)
@@ -327,8 +337,8 @@ def share_output():
             api.update_status(f'{company.capitalize()} Mentioned by: {share_dict[company]["Handle"]}  '
                               f'Initial Share Price: {share_dict[company]["Initial"]:.2f} '
                               f'Current Share Price: {share_dict[company]["Current"]:.2f} '
-                              f'Change: {share_dict[company]["Change"]:.2f} '
-                              f'Max Change: {share_dict[company]["Max-change"]:.2f}'
+                              f'Current change: {share_dict[company]["Change"]:.2f} '
+                              f'Max change: {share_dict[company]["Max-change"]:.2f}'
                               )
 
         except tweepy.TweepError as error:
@@ -367,8 +377,8 @@ def main():
         handles = TWITTER_HANDLES
 
     # Sets up jobs for schedule to handle
-    schedule.every().day.at("16:00").do(minus_days)
-    schedule.every().day.at("15:49").do(share_output)
+    #schedule.every().day.at("16:00").do(minus_days)
+    schedule.every().day.at("22:25").do(share_output)
 
     while True:
         for handle in handles:
@@ -396,7 +406,9 @@ def main():
         get_current_shares()
         schedule.run_pending()
 
-        print()
+        now = datetime.now()
+        print(f'Running: {now.hour}:{now.minute} - {now.day}/{now.month}/{now.year}')
+
         time.sleep(30)
 
 
