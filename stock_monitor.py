@@ -42,10 +42,6 @@ TWITTER_HANDLES = config["Twitter-Auth"]["Handles"]
 logging.basicConfig(filename='./Files/log.txt', level=logging.DEBUG)
 
 
-##################################
-#       TWITTER FUNCTIONS        #
-##################################
-
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
@@ -119,10 +115,6 @@ def check_mentions():
     except tweepy.TweepError as error:
         logging.debug(f'Error checking the mentions: {error}')
 
-
-##################################
-#       COMPANY FUNCTIONS        #
-##################################
 
 def check_for_companies(tweet, handle):
     """Checks list of companies with Trump's tweet
@@ -268,11 +260,6 @@ def add_days():
         del company_dict[company]
 
     utils.write_to_json(MONITOR, company_dict)
-
-
-##################################
-#       OUTPUT FUNCTIONS         #
-##################################
 
 
 def tweet(handle, matches):
