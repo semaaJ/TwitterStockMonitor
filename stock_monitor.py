@@ -117,9 +117,9 @@ def check_mentions():
 
 
 def check_for_companies(tweet, handle):
-    """Checks list of companies with Trump's tweet
-       seeing if any companies are listed in his tweet.
-       Inputs matches into monitor.json"""
+    """Checks list of companies within the Handle's tweet
+       seeing if any companies are listed in their tweet.
+       Inputs matches into monitor.json and returns the matches"""
 
     matches = []
     punc = ("!", ",", ".", ":", ";", "@", "?", "(", ")")
