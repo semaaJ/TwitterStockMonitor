@@ -10,7 +10,7 @@ import logging
 import urllib.request
 import urllib.error
 
-from datetime import datetime, timedelta
+from datetime import datetime, date
 from pinance import Pinance
 
 
@@ -148,7 +148,8 @@ def check_for_companies(tweet, handle):
         comp_d[company]["Symbol"] = "unknown"
         comp_d[company]["Initial-share-price"] = 1
         comp_d[company]["Current-share-price"] = 1
-        comp_d[company]["Share-price-list"] = {"1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": []}
+        comp_d[company]["Share-price-list"] = {"0": [], "1": [], "2": [], "3": [],
+                                               "4": [], "5": [], "6": [], "7": []}
 
     company_dict.update(comp_d)
     utils.write_to_json(MONITOR, company_dict)
@@ -240,23 +241,34 @@ def difference_in_shares():
     return share_difference_dict
 
 
-def add_days():
-    """Adds a day from the "Day",
-       removes from monitor.json if day is 7"""
+def current_day():
+    """Compares the current date, to the date the tweet was mentioned.
+       If it's different to the current "Day" in the json file, replaces it."""
 
     company_dict = utils.open_json(MONITOR)
-    remove = []
+    remove = []  # Keeps a list of companies that have reached their 7 day limit, and removes them
+
+    # Create a date object with the current time
+    current_date = datetime.now()
+    d1 = date(current_date.year, current_date.month, current_date.day)
 
     for company in company_dict:
-        if company_dict[company]["Day"] < 7:
-            company_dict[company]["Day"] += 1
-        else:
+        date_mentioned = company_dict[company]["Date-mentioned"]
+
+        # Converts "04-08-2017 22:34:49", to [2017, 08, 04]
+        date_mentioned = date_mentioned.split()[0]
+        date_mentioned = date_mentioned.split("-")[::-1]
+
+        d0 = date(int(date_mentioned[0]), int(date_mentioned[1]), int(date_mentioned[2]))
+        day = abs((d1 - d0).days)
+
+        if day > 7:
             remove.append(company)
 
+        else:
+            company_dict[company]["Day"] = day
+
     for company in remove:
-        # Do I want to keep a record of all the companies that have been mentioned and their prices???
-        # Create a folder called past mentions, put each company into its own file??
-        # Intel_Mentioned_
         del company_dict[company]
 
     utils.write_to_json(MONITOR, company_dict)
@@ -355,8 +367,7 @@ def main():
     else:
         handles = TWITTER_HANDLES
 
-    # Sets up jobs for schedule to handle
-    schedule.every().day.at("07:00").do(add_days)
+    # Sets up share_output job
     schedule.every().day.at("18:00").do(share_output)
 
     while True:
@@ -383,6 +394,7 @@ def main():
         # Gets current share price for each company being monitored
         # Checks if there are any schedules to be run
         get_current_shares()
+        current_day()
         schedule.run_pending()
 
         now = datetime.now()
