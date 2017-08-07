@@ -1,4 +1,3 @@
-
 import json
 import schedule
 import company
@@ -6,7 +5,9 @@ import smtplib
 import logging
 
 from time import sleep
+from twitter import Twitter
 from datetime import datetime
+
 
 logging.basicConfig(filename='./Files/logs.txt', level=logging.DEBUG,
                     format='%(asctime)s :~: %(funcName)s :~: %(message)s')
@@ -22,10 +23,6 @@ EMAIL = config["EmailInfo"]["Email"]
 PASSWORD = config["EmailInfo"]["Password"]
 
 # Twitter keys/names
-CONSUMER_KEY = config["TwitterAuth"]["ConsumerKey"]
-CONSUMER_KEY_SECRET = config["TwitterAuth"]["ConsumerSecret"]
-ACCESS_TOKEN = config["TwitterAuth"]["AccessToken"]
-ACCESS_TOKEN_SECRET = config["TwitterAuth"]["AccessTokenSecret"]
 TWITTER_HANDLES = config["TwitterAuth"]["Handles"]
 
 
@@ -74,9 +71,6 @@ def initial_start():
     return twitter_handles
 
 
-from twitter import Twitter
-
-
 def main():
     # Checks if this is the first time running the script
     # Allows the user to choose the Twitter Handles to follow
@@ -108,7 +102,7 @@ def main():
                     company.get_initial_company_info()
 
                     # Outputs the matches via twitter/email
-                    twitter.initial_tweet()
+                    twitter.initial_tweet(matches)
                     email(handle, matches)
 
             # Checks mentions for sign ups/removals
