@@ -1,9 +1,8 @@
 import tweepy
-import re
+import json
 
-from main import CONSUMER_KEY, CONSUMER_KEY_SECRET
-from main import ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 from main import logging
+import company
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # File path to the LatestTweets folder
@@ -12,6 +11,15 @@ LATEST_TWEET = './Files/LatestTweets/'
 # File path to the list of Twitter Handlers/Emails to DM/Email
 TWITTER_NAMES = './Files/twitter_names.txt'
 EMAILS = './Files/emails.txt'
+
+# Twitter API constants
+with open('./Files/config.json') as json_f:
+    config = json.load(json_f)
+
+CONSUMER_KEY = config["TwitterAuth"]["ConsumerKey"]
+CONSUMER_KEY_SECRET = config["TwitterAuth"]["ConsumerSecret"]
+ACCESS_TOKEN = config["TwitterAuth"]["AccessToken"]
+ACCESS_TOKEN_SECRET = config["TwitterAuth"]["AccessTokenSecret"]
 
 
 class Twitter:
@@ -30,10 +38,7 @@ class Twitter:
 
         try:
             latest_tweet = self.api.user_timeline(screen_name=self.handle, count=1)[0]
-            print(latest_tweet.text)
-
-            tweet = self.clean_tweet(latest_tweet.text)
-            print(tweet)
+            tweet = latest_tweet.text
 
             with open(f'{LATEST_TWEET}{self.handle}.txt', "r") as f:
                 old_tweet = f.read()
@@ -114,7 +119,7 @@ class Twitter:
         except tweepy.TweepError as error:
             logging.debug(error)
 
-    def initial_tweet(self):
+    def initial_tweet(self, matches):
         """Tweets when a company is mentioned, along with it's sentiment."""
 
         sentiment = self.sentiment_analysis()
@@ -123,13 +128,15 @@ class Twitter:
                           "neutral": u"\U00002796"
                           }
 
-        try:
-            self.api.update_status(f'{self.handle} just mentioned TOYOTA {sentiment}ly in their latest tweet! '
-                                   f'{sentiment_dict[sentiment]} '
-                                   f'https://twitter.com/{self.handle}/status/{self.tweet_id}')
+        for comp in matches:
+            try:
+                self.api.update_status(f'{self.handle} just mentioned {comp.upper()} {sentiment}ly '
+                                       f'in their latest tweet! {sentiment_dict[sentiment]}. Time to start '
+                                       f"monitoring {comp.upper()}'s shares.. "
+                                       f'https://twitter.com/{self.handle}/status/{self.tweet_id}')
 
-        except tweepy.TweepError as error:
-            logging.debug(error)
+            except tweepy.TweepError as error:
+                logging.debug(error)
 
     def sentiment_analysis(self):
         """Performs a sentiment analysis on the tweet"""
@@ -160,17 +167,3 @@ class Twitter:
 
             except tweepy.TweepError as error:
                 logging.debug(error)
-
-    def clean_tweet(self, tweet):
-        """Removes all emojis from the tweet"""
-
-        emoji_pattern = re.compile("["
-                                   u"\U0001F600-\U0001F64F"  # emoticons
-                                   u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                                   u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                                   u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                                   "]+", flags=re.UNICODE)
-
-        tweet = emoji_pattern.sub(r'', tweet)
-        return tweet
-
