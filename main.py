@@ -1,3 +1,4 @@
+
 import json
 import schedule
 import company
@@ -5,7 +6,6 @@ import smtplib
 import logging
 
 from time import sleep
-from twitter import Twitter
 from datetime import datetime
 
 logging.basicConfig(filename='./Files/logs.txt', level=logging.DEBUG,
@@ -18,15 +18,15 @@ with open("./Files/config.json", "r") as f:
 INITIAL_START = config["InitialStart"]
 
 # Email/Password info
-EMAIL = config["Email-Info"]["Email"]
-PASSWORD = config["Email-Info"]["Password"]
+EMAIL = config["EmailInfo"]["Email"]
+PASSWORD = config["EmailInfo"]["Password"]
 
 # Twitter keys/names
-CONSUMER_KEY = config["Twitter-Auth"]["ConsumerKey"]
-CONSUMER_KEY_SECRET = config["Twitter-Auth"]["ConsumerSecret"]
-ACCESS_TOKEN = config["Twitter-Auth"]["AccessToken"]
-ACCESS_TOKEN_SECRET = config["Twitter-Auth"]["AccessTokenSecret"]
-TWITTER_HANDLES = config["Twitter-Auth"]["Handles"]
+CONSUMER_KEY = config["TwitterAuth"]["ConsumerKey"]
+CONSUMER_KEY_SECRET = config["TwitterAuth"]["ConsumerSecret"]
+ACCESS_TOKEN = config["TwitterAuth"]["AccessToken"]
+ACCESS_TOKEN_SECRET = config["TwitterAuth"]["AccessTokenSecret"]
+TWITTER_HANDLES = config["TwitterAuth"]["Handles"]
 
 
 def email(handle, matches):
@@ -54,24 +54,27 @@ def initial_start():
     print("Welcome to the Twitter Stock Monitor!")
     twitter_handles = input("Enter the Twitter handles you want this bot to follow, separated by spaces: \n").split()
 
-    with open('./Files/config.json') as f:
-        json_data = json.load(f)
+    with open('./Files/config.json') as json_f:
+        json_data = json.load(json_f)
 
-    json_data["Twitter-Auth"]["Handles"] = twitter_handles
-    json_data["Files"]["InitialStart"] = False
+    json_data["TwitterAuth"]["Handles"] = twitter_handles
+    json_data["InitialStart"] = False
 
-    with open('./Files/config.json') as f:
-        json.dump(json_data, f, sort_keys=True, indent=4, ensure_ascii=False)
+    with open('./Files/config.json', 'w') as json_f:
+        json.dump(json_data, json_f, sort_keys=True, indent=4, ensure_ascii=False)
 
     print("Creating files needed..")
 
     for handle in twitter_handles:
-        with open(f'{GENERIC}{handle}.txt', "w") as f:
+        with open(f'./Files/LatestTweets/{handle}.txt', "w") as f:
             continue
 
     print(f'Files created! This bot will now begin to monitor: {twitter_handles}\n\n\n')
 
     return twitter_handles
+
+
+from twitter import Twitter
 
 
 def main():
