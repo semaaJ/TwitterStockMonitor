@@ -3,16 +3,9 @@
         "Email": "YOUR EMAIL",
         "Password": "YOUR PASSWORD"
     },
-    "Files": {
-        "Companies": "./Files/companies.txt",
-        "CompaniesToMonitor": "./Files/monitor.json",
-        "Emails": "./Files/emails.txt",
-        "Generic": "./Files/LatestTweets/",
-        "InitialStart": true,
-        "Log": "./Files/log.txt",
-        "Twitter": "./Files/twitter_names.txt"
-        
-    },
+
+    "InitialStart": true,
+
     "Twitter-Auth": {
         "AccessToken": "YOUR ACCESS TOKEN",
         "AccessTokenSecret": "YOUR ACCESS TOKEN SECRET",
