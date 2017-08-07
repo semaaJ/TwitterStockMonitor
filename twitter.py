@@ -1,19 +1,21 @@
 import tweepy
-import company
+import re
 
-from main import CONSUMER_KEY,CONSUMER_KEY_SECRET
+from main import CONSUMER_KEY, CONSUMER_KEY_SECRET
 from main import ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+from main import logging
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # File path to the LatestTweets folder
 LATEST_TWEET = './Files/LatestTweets/'
 
-# File path to the list of Twitter Handlers to DM
+# File path to the list of Twitter Handlers/Emails to DM/Email
 TWITTER_NAMES = './Files/twitter_names.txt'
+EMAILS = './Files/emails.txt'
 
 
 class Twitter:
-    def __init__(self, handle):
+    def __init__(self, handle=''):
         auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_KEY_SECRET)
         auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
         self.api = tweepy.API(auth)
@@ -28,10 +30,16 @@ class Twitter:
 
         try:
             latest_tweet = self.api.user_timeline(screen_name=self.handle, count=1)[0]
-            tweet = latest_tweet.text
+            print(latest_tweet.text)
+
+            tweet = self.clean_tweet(latest_tweet.text)
+            print(tweet)
 
             with open(f'{LATEST_TWEET}{self.handle}.txt', "r") as f:
                 old_tweet = f.read()
+
+            print(f'Old tweet: {old_tweet}')
+            print(f'New tweet: {tweet}')
 
             if latest_tweet != old_tweet:
                 with open(f'{LATEST_TWEET}{self.handle}.txt', 'w') as f:
@@ -43,57 +51,68 @@ class Twitter:
                 return tweet
 
         except tweepy.TweepError as error:
-            print(error)  # Just print for now, unsure what to do with logging atm
+            logging.debug(error)
 
-    # def check_mentions(self):
-    #     """Checks mentions for sign up's via email or twitter
-    #        via "Sign up / Sign up [email]"""
-    #
-    #     try:
-    #         mentions = self.api.mentions_timeline(count=3)
-    #
-    #         for mention in mentions:
-    #             if "stop" in mention.text.lower():
-    #                 # Unsubscribe for email
-    #                 if len(mention.text.split()) == 3:
-    #                     email = mention.text.split()[2]
-    #                     email_list = utils.open_file(EMAILS).split()
-    #
-    #                     if email in email_list:
-    #                         email_list.remove(email)
-    #                         utils.write_to_file(EMAILS, ' '.join(email_list))
-    #
-    #                 # Unsubscribe for Twitter handle
-    #                 else:
-    #                     twitter_name = mention.user.screen_name
-    #                     twitter_name_list = utils.open_file(TWITTER_NAMES).split()
-    #
-    #                     if twitter_name in twitter_name_list:
-    #                         twitter_name_list.remove(twitter_name)
-    #                         utils.write_to_file(TWITTER_NAMES, ' '.join(twitter_name_list))
-    #
-    #             elif "sign up" in mention.text.lower():
-    #                 # Email sign up
-    #                 if len(mention.text.split()) > 3:
-    #                     email = mention.text.split()[3]
-    #                     email_list = utils.open_file(EMAILS).split()
-    #
-    #                     if email not in email_list:
-    #                         email_list.append(email)
-    #                         utils.append_to_file(EMAILS, email)
-    #
-    #                 # Twitter handle sign up
-    #                 else:
-    #                     twitter_name = mention.user.screen_name
-    #                     twitter_name_list = utils.open_file(TWITTER_NAMES).split()
-    #
-    #                     if twitter_name not in twitter_name_list:
-    #                         twitter_name_list.append(twitter_name)
-    #                         utils.append_to_file(TWITTER_NAMES, twitter_name)
-    #
-    #     except tweepy.TweepError as error:
-    #         logging.debug(f'Error checking the mentions: {error}')
+    def check_mentions(self):
+        """Checks mentions for sign up's via email or twitter
+           via "Sign up / Sign up [email]"""
 
+        try:
+            mentions = self.api.mentions_timeline(count=3)
+
+            for mention in mentions:
+                if "stop" in mention.text.lower():
+                    # Unsubscribe for email
+                    if len(mention.text.split()) == 3:
+                        email = mention.text.split()[2]
+
+                        with open(EMAILS, 'r') as f:
+                            email_list = f.read().split()
+
+                        if email in email_list:
+                            email_list.remove(email)
+
+                            with open(EMAILS, 'w') as f:
+                                f.write(' '.join(email_list))
+
+                    # Unsubscribe for Twitter handle
+                    else:
+                        twitter_name = mention.user.screen_name
+
+                        with open(TWITTER_NAMES, 'r') as f:
+                            twitter_name_list = f.read().split()
+
+                        if twitter_name in twitter_name_list:
+                            twitter_name_list.remove(twitter_name)
+
+                            with open(TWITTER_NAMES, 'w') as f:
+                                f.write(' '.join(twitter_name_list))
+
+                elif "sign up" in mention.text.lower():
+                    # Email sign up
+                    if len(mention.text.split()) > 3:
+                        email = mention.text.split()[3]
+
+                        with open(EMAILS, 'r') as f:
+                            email_list = f.read().split()
+
+                        if email not in email_list:
+                            with open(EMAILS, 'a') as f:
+                                f.write(f' {email}')
+
+                    # Twitter handle sign up
+                    else:
+                        twitter_name = mention.user.screen_name
+
+                        with open(TWITTER_NAMES, 'r') as f:
+                            twitter_name_list = f.read().split()
+
+                        if twitter_name not in twitter_name_list:
+                            with open(TWITTER_NAMES, 'a') as f:
+                                f.write(f' {twitter_name}')
+
+        except tweepy.TweepError as error:
+            logging.debug(error)
 
     def initial_tweet(self):
         """Tweets when a company is mentioned, along with it's sentiment."""
@@ -110,7 +129,7 @@ class Twitter:
                                    f'https://twitter.com/{self.handle}/status/{self.tweet_id}')
 
         except tweepy.TweepError as error:
-            print(error)
+            logging.debug(error)
 
     def sentiment_analysis(self):
         """Performs a sentiment analysis on the tweet"""
@@ -129,7 +148,7 @@ class Twitter:
         """Calls difference_in_shares from the Companies module,
             Outputs the data to twitter."""
 
-        share_dict = company.difference_in_shares()
+        share_dict = company.get_company_dict()
 
         for comp in share_dict:
             try:
@@ -140,7 +159,18 @@ class Twitter:
                     )
 
             except tweepy.TweepError as error:
-                print(error)
+                logging.debug(error)
 
+    def clean_tweet(self, tweet):
+        """Removes all emojis from the tweet"""
 
+        emoji_pattern = re.compile("["
+                                   u"\U0001F600-\U0001F64F"  # emoticons
+                                   u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                                   u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                                   u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                                   "]+", flags=re.UNICODE)
+
+        tweet = emoji_pattern.sub(r'', tweet)
+        return tweet
 
