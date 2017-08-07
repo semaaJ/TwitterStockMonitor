@@ -27,11 +27,12 @@ def check_for_companies(tweet, handle):
     edited_tweet = tweet.translate(translator).lower()
 
     with open(COMPANIES) as f:
-        companies = [line.strip() for line in f]
+        companies = set(line.strip() for line in f)
 
     for word in edited_tweet.split():
-        if word == bisect.bisect(word, companies):
+        if word in companies:
             matches.append(word)
+        
 
     company_dict = get_company_dict()
 
@@ -82,7 +83,7 @@ def get_initial_company_info():
 
         # Gets initial share price
         if company_dict[company]["initialSharePrice"] == 1:
-            stock = Pinance(company_dict[company]["Symbol"])
+            stock = Pinance(company_dict[company]["symbol"])
             stock.get_quotes()
 
             share = stock.quotes_data["LastTradePrice"]
@@ -99,27 +100,32 @@ def get_current_shares():
 
     company_dict = get_company_dict()
 
-    for company in company_dict:
-        try:
-            stock = Pinance(company_dict[company]["symbol"])
-            stock.get_quotes()
+    gmt = datetime.now()
+    market_time = gmt.replace(hour=(gmt.hour - 5))
 
-            share = stock.quotes_data["LastTradePrice"]
+    # Ensure market is open (opening hours 9:30 - 4 EST)
+    if (market_time.hour > 9 and market_time.minute > 30) and (market_time.hour < 4):
+        for company in company_dict:
+            try:
+                stock = Pinance(company_dict[company]["symbol"])
+                stock.get_quotes()
 
-            # Gets the current shareprice, replaces the "current"
-            # and adds to the sharePriceList
-            curr_day = str(company_dict[company]["Day"])
-            company_dict[company]["currentSharePrice"] = float(share)
-            company_dict[company]["sharePriceList"][curr_day].append(float(share))
+                share = stock.quotes_data["LastTradePrice"]
 
-            # Gets the current share change
-            share_change = 1.0 - (company_dict[company]["Initial-share-price"] /
-                                  company_dict[company]["Current-share-price"])
-            company_dict[company]["shareChange"] = share_change
+                # Gets the current shareprice, replaces the "current"
+                # and adds to the sharePriceList
+                curr_day = str(company_dict[company]["day"])
+                company_dict[company]["currentSharePrice"] = float(share)
+                company_dict[company]["sharePriceList"][curr_day].append(float(share))
 
-        except TypeError as error:
-            # Will catch the error if share returns a value other than a float
-            logging.log(error)
+                # Gets the current share change
+                share_change = 1.0 - (company_dict[company]["Initial-share-price"] /
+                                      company_dict[company]["Current-share-price"])
+                company_dict[company]["shareChange"] = share_change
+
+            except TypeError as error:
+                # Will catch the error if share returns a value other than a float
+                logging.log(error)
 
     with open(MONITOR, "w") as f:
         json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
@@ -144,7 +150,7 @@ def current_day():
     d1 = date(current_date.year, current_date.month, current_date.day)
 
     for company in company_dict:
-        date_mentioned = company_dict[company]["Date-mentioned"]
+        date_mentioned = company_dict[company]["dateMentioned"]
 
         # Converts "04-08-2017 22:34:49", to [2017, 08, 04]
         date_mentioned = date_mentioned.split()[0]
@@ -158,11 +164,17 @@ def current_day():
             remove.append(company)
 
         else:
-            company_dict[company]["Day"] = day
+            company_dict[company]["day"] = day
 
     for company in remove:
-        # Add something here to keep track of the older mentions
+        company_date = company_dict[company]["dateMentioned"]
+        file_name = f'{company}_{company_date}'
+
+        with open(f'./Files/PastMentios/{file_name}.json', 'w') as f:
+            json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
+
         del company_dict[company]
 
     with open(MONITOR, "w") as f:
         json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
+
