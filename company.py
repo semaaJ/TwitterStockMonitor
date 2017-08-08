@@ -2,7 +2,6 @@ import string
 import urllib.request
 import urllib.error
 import json
-import bisect
 
 from datetime import datetime, date
 from pinance import Pinance
@@ -32,7 +31,6 @@ def check_for_companies(tweet, handle):
     for word in edited_tweet.split():
         if word in companies:
             matches.append(word)
-        
 
     company_dict = get_company_dict()
 
@@ -131,12 +129,6 @@ def get_current_shares():
         json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
 
 
-def get_company_dict():
-    """Opens and returns the monitor.json file"""
-    with open(MONITOR, 'r') as f:
-        return json.load(f)
-
-
 def current_day():
     """Compares the current date, to the date the tweet was mentioned.
        If it's different to the current "Day" in the json file, replaces it."""
@@ -167,6 +159,7 @@ def current_day():
             company_dict[company]["day"] = day
 
     for company in remove:
+        # Creates a new file and stores the old data in the PastMentions folder
         company_date = company_dict[company]["dateMentioned"]
         file_name = f'{company}_{company_date}'
 
@@ -178,3 +171,8 @@ def current_day():
     with open(MONITOR, "w") as f:
         json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
 
+
+def get_company_dict():
+    """Opens and returns the monitor.json file"""
+    with open(MONITOR, 'r') as f:
+        return json.load(f)
