@@ -38,15 +38,12 @@ class Twitter:
 
         try:
             latest_tweet = self.api.user_timeline(screen_name=self.handle, count=1)[0]
-            tweet = latest_tweet.text
+            tweet = latest_tweet.text.encode('ascii', 'ignore').decode('utf-8')  # Removes emjois
 
             with open(f'{LATEST_TWEET}{self.handle}.txt', "r") as f:
                 old_tweet = f.read()
 
-            print(f'Old tweet: {old_tweet}')
-            print(f'New tweet: {tweet}')
-
-            if latest_tweet != old_tweet:
+            if tweet != old_tweet:
                 with open(f'{LATEST_TWEET}{self.handle}.txt', 'w') as f:
                     f.write(tweet)
 
@@ -131,8 +128,7 @@ class Twitter:
         for comp in matches:
             try:
                 self.api.update_status(f'{self.handle} just mentioned {comp.upper()} {sentiment}ly '
-                                       f'in their latest tweet! {sentiment_dict[sentiment]}. Time to start '
-                                       f"monitoring {comp.upper()}'s shares.. "
+                                       f'in their latest tweet! '
                                        f'https://twitter.com/{self.handle}/status/{self.tweet_id}')
 
             except tweepy.TweepError as error:
@@ -167,3 +163,5 @@ class Twitter:
 
             except tweepy.TweepError as error:
                 logging.debug(error)
+
+
