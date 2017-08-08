@@ -115,7 +115,7 @@ def main():
 
         now = datetime.now()
         print(f'Running: {now.hour}:{now.minute} - {now.day}/{now.month}/{now.year}')
-        sleep(30)
+        sleep(10)
 
 if __name__ == "__main__":
     main()
