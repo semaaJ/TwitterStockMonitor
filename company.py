@@ -102,7 +102,7 @@ def get_current_shares():
     market_time = gmt.replace(hour=(gmt.hour - 5))
 
     # Ensure market is open (opening hours 9:30 - 4 EST)
-    if (market_time.hour > 9 and market_time.minute > 30) and (market_time.hour < 4):
+    if (market_time.hour > 9) and (market_time.hour < 16):
         for company in company_dict:
             try:
                 stock = Pinance(company_dict[company]["symbol"])
@@ -117,8 +117,8 @@ def get_current_shares():
                 company_dict[company]["sharePriceList"][curr_day].append(float(share))
 
                 # Gets the current share change
-                share_change = 1.0 - (company_dict[company]["Initial-share-price"] /
-                                      company_dict[company]["Current-share-price"])
+                share_change = 1.0 - (company_dict[company]["initialSharePrice"] /
+                                      company_dict[company]["currentSharePrice"])
                 company_dict[company]["shareChange"] = share_change
 
             except TypeError as error:
