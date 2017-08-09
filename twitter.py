@@ -156,12 +156,10 @@ class Twitter:
         for comp in share_dict:
             try:
                 self.api.update_status(
-                    f'Since {share_dict["Handle"]} mentioned {comp}, {share_dict[comp]["Days"]} days ago, '
-                    f'their shares have changed from {share_dict[comp]["Initial"]:.2f} to '
-                    f"{share_dict[comp]['Current']:.2f} that's a {share_dict[comp]['Change']}% change!"
+                    f'Since {share_dict[comp]["handle"]} mentioned {comp.upper()}, {share_dict[comp]["day"]} days ago, '
+                    f'their shares have changed from {share_dict[comp]["initialSharePrice"]:.2f} to '
+                    f"{share_dict[comp]['currentSharePrice']:} that's a {share_dict[comp]['shareChange']:.3f}% change!"
                     )
 
             except tweepy.TweepError as error:
                 logging.debug(error)
-
-

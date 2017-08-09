@@ -9,8 +9,10 @@ from twitter import Twitter
 from datetime import datetime
 
 
+# Sets up logging info
 logging.basicConfig(filename='./Files/logs.txt', level=logging.DEBUG,
                     format='%(asctime)s :~: %(funcName)s :~: %(message)s')
+
 
 with open("./Files/config.json", "r") as f:
     config = json.load(f)
@@ -82,7 +84,7 @@ def main():
 
     # Sets up share_output job
     twit = Twitter()
-    schedule.every().day.at("18:00").do(twit.share_output)
+    schedule.every().day.at("18:17").do(twit.share_output)
     schedule.every(15).minutes.do(company.current_day)
 
     while True:
