@@ -102,7 +102,7 @@ def get_current_shares():
     market_time = gmt.replace(hour=(gmt.hour - 5))
 
     # Ensure market is open (opening hours 9:30 - 4 EST)
-    if (market_time.hour > 9) and (market_time.hour < 16):
+    if (market_time.hour >= 9) and (market_time.hour < 16):
         for company in company_dict:
             try:
                 stock = Pinance(company_dict[company]["symbol"])
@@ -110,11 +110,12 @@ def get_current_shares():
 
                 share = stock.quotes_data["LastTradePrice"]
 
-                # Gets the current shareprice, replaces the "current"
+                # Gets the current share price, replaces the "current"
                 # and adds to the sharePriceList
                 curr_day = str(company_dict[company]["day"])
                 company_dict[company]["currentSharePrice"] = float(share)
-                company_dict[company]["sharePriceList"][curr_day].append(float(share))
+                company_dict[company]["sharePriceList"][curr_day].append(("{:%d-%m-%Y %H:%M:%S}".format(datetime.now()),
+                                                                          float(share)))
 
                 # Gets the current share change
                 share_change = 1.0 - (company_dict[company]["initialSharePrice"] /
