@@ -23,8 +23,7 @@ pip install nltk
 
 ![Config setup](http://i.imgur.com/TBxSICC.png "") 
 
-- If you don't want the email function, you need to remove it from the code. Remove "Output(matches).email()" from the main() function, and remove the entire def email() function inside the Output Class. 
-- If you would like to use this with another Twitter user, you need to change the "Twitter" in the Config, to the users Twitter handle.
-- You can change the companies you want to be monitored by removing the companies within companies.tx and adding your own, one on each line.
+
+This is still being updated. 
 
 
