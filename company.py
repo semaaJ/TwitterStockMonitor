@@ -39,17 +39,20 @@ def check_for_companies(tweet, handle):
     # Information that is needed by get_initial/current
     # Fix error: If a company is mentioned that is already in the json, it overwrites it.
     for company in matches:
-        comp_d[company] = {}
-        comp_d[company]["dateMentioned"] = "{:%d-%m-%Y %H:%M:%S}".format(datetime.now())
-        comp_d[company]["handle"] = handle
-        comp_d[company]["tweet"] = tweet
-        comp_d[company]["day"] = 0
-        comp_d[company]["symbol"] = "unknown"
-        comp_d[company]["shareChange"] = 0
-        comp_d[company]["initialSharePrice"] = 1
-        comp_d[company]["currentSharePrice"] = 1
-        comp_d[company]["sharePriceList"] = {"0": [], "1": [], "2": [], "3": [],
-                                             "4": [], "5": [], "6": [], "7": []}
+        dict_name = f'{company.upper()}_{datetime.now()}'
+
+        comp_d[dict_name] = {}
+        comp_d[dict_name]["dateMentioned"] = "{:%d-%m-%Y %H:%M:%S}".format(datetime.now())
+        comp_d[dict_name]["handle"] = handle
+        comp_d[dict_name]["company"] = company
+        comp_d[dict_name]["tweet"] = tweet
+        comp_d[dict_name]["day"] = 0
+        comp_d[dict_name]["symbol"] = "unknown"
+        comp_d[dict_name]["shareChange"] = 0
+        comp_d[dict_name]["initialSharePrice"] = 1
+        comp_d[dict_name]["currentSharePrice"] = 1
+        comp_d[dict_name]["sharePriceList"] = {"0": [], "1": [], "2": [], "3": [],
+                                               "4": [], "5": [], "6": [], "7": []}
 
     company_dict.update(comp_d)
     with open(MONITOR, "w") as f:
@@ -77,7 +80,7 @@ def get_initial_company_info():
                     company_dict[company]["symbol"] = d['items'][0]['symbol']
 
             except urllib.error.HTTPError as error:
-                logging.log(error)
+                logging.debug(error)
 
         # Gets initial share price
         if company_dict[company]["initialSharePrice"] == 1:
@@ -102,7 +105,7 @@ def get_current_shares():
     market_time = gmt.replace(hour=(gmt.hour - 5))
 
     # Ensure market is open (opening hours 9:30 - 4 EST)
-    if (market_time.hour >= 9) and (market_time.hour < 16):
+    if (int(str(market_time.hour) + str(market_time.minute)) >= 930) and (market_time.hour < 16):
         for company in company_dict:
             try:
                 stock = Pinance(company_dict[company]["symbol"])
@@ -124,7 +127,7 @@ def get_current_shares():
 
             except TypeError as error:
                 # Will catch the error if share returns a value other than a float
-                logging.log(error)
+                logging.debug(error)
 
     with open(MONITOR, "w") as f:
         json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
@@ -161,10 +164,7 @@ def current_day():
 
     for company in remove:
         # Creates a new file and stores the old data in the PastMentions folder
-        company_date = company_dict[company]["dateMentioned"]
-        file_name = f'{company}_{company_date}'
-
-        with open(f'./Files/PastMentios/{file_name}.json', 'w') as f:
+        with open(f'./Files/PastMentios/{company}.json', 'w') as f:
             json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
 
         del company_dict[company]
