@@ -130,9 +130,6 @@ def get_current_shares():
                 # Will catch the error if share returns a value other than a float
                 logging.debug(error)
 
-    else:
-        print("no")
-
     with open(MONITOR, "w") as f:
         json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
 
