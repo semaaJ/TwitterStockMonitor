@@ -44,7 +44,7 @@ def check_for_companies(tweet, handle):
         comp_d[dict_name] = {}
         comp_d[dict_name]["dateMentioned"] = "{:%d-%m-%Y %H:%M:%S}".format(datetime.now())
         comp_d[dict_name]["handle"] = handle
-        comp_d[dict_name]["company"] = company
+        comp_d[dict_name]["companyName"] = company
         comp_d[dict_name]["tweet"] = tweet
         comp_d[dict_name]["day"] = 0
         comp_d[dict_name]["symbol"] = "unknown"
@@ -72,7 +72,7 @@ def get_initial_company_info():
             try:
                 with urllib.request.urlopen(
                       f'https://finance.yahoo.com/_finance_doubledown/'
-                      f'api/resource/searchassist;searchTerm={company}') as response:
+                      f'api/resource/searchassist;searchTerm={company_dict[company]["companyName"]}') as response:
 
                     html = response.read().decode()
                     d = json.loads(html)
@@ -81,13 +81,14 @@ def get_initial_company_info():
 
             except urllib.error.HTTPError as error:
                 logging.debug(error)
+                break
 
         # Gets initial share price
         if company_dict[company]["initialSharePrice"] == 1:
             stock = Pinance(company_dict[company]["symbol"])
             stock.get_quotes()
 
-            share = stock.quotes_data["LastTradePrice"]
+            share = stock.quotes_data["regularMarketPrice"]
 
             company_dict[company]["initialSharePrice"] = float(share)
             company_dict[company]["currentSharePrice"] = float(share)
@@ -105,13 +106,13 @@ def get_current_shares():
     market_time = gmt.replace(hour=(gmt.hour - 5))
 
     # Ensure market is open (opening hours 9:30 - 4 EST)
-    if (int(str(market_time.hour) + str(market_time.minute)) >= 930) and (market_time.hour < 16):
+    if int(str(market_time.hour) + str(market_time.minute if market_time.minute >= 10 else f'0{market_time.minute}')):
         for company in company_dict:
             try:
                 stock = Pinance(company_dict[company]["symbol"])
                 stock.get_quotes()
 
-                share = stock.quotes_data["LastTradePrice"]
+                share = stock.quotes_data["regularMarketPrice"]
 
                 # Gets the current share price, replaces the "current"
                 # and adds to the sharePriceList
@@ -128,6 +129,9 @@ def get_current_shares():
             except TypeError as error:
                 # Will catch the error if share returns a value other than a float
                 logging.debug(error)
+
+    else:
+        print("no")
 
     with open(MONITOR, "w") as f:
         json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
