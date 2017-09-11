@@ -1,12 +1,12 @@
 {
-    "Email-Info": {
+    "EmailInfo": {
         "Email": "YOUR EMAIL",
         "Password": "YOUR PASSWORD"
     },
 
     "InitialStart": true,
 
-    "Twitter-Auth": {
+    "TwitterAuth": {
         "AccessToken": "YOUR ACCESS TOKEN",
         "AccessTokenSecret": "YOUR ACCESS TOKEN SECRET",
         "ConsumerKey": "YOUR CONSUMER KEY",
