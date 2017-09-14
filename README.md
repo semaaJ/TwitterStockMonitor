@@ -1,7 +1,8 @@
+# Website
+http://www.celebritystockmonitor.me/
+
 # TwitterStockMonitor
 This project originally started when I noticed that if Trump mentioned a company within his tweets, their shares would either go up in price if the tweet was positive or drop if the tweet was negative. I decided to make a script to follow Trump and monitor the companies that he mentioned over a week, to see how the tweet affected the price of the company's shares. I have updated this to make it usable for multiple Twitter accounts at the same time. 
-
-Flask project of this is currently being developed: https://github.com/semaaJ/TSMFlask
 
 ## Requirements
 For this you will need:
