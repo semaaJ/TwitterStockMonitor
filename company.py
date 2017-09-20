@@ -25,7 +25,7 @@ def check_for_companies(tweet, handle):
     translator = str.maketrans('', '', string.punctuation)
     edited_tweet = tweet.translate(translator).lower()
 
-    with open(COMPANIES) as f:
+    with open(COMPANIES, 'r', encoding='latin-1') as f:
         companies = set(line.strip() for line in f)
 
     for word in edited_tweet.split():
@@ -136,7 +136,9 @@ def get_current_shares():
 
 def current_day():
     """Compares the current date, to the date the tweet was mentioned.
-       If it's different to the current "Day" in the json file, replaces it."""
+       If it's different to the current "Day" in the json file, replaces it.
+
+       If the "Day" == 7, removes it from current monitors and adds to past_companies"""
 
     company_dict = get_company_dict()
 
@@ -164,9 +166,14 @@ def current_day():
             company_dict[company]["day"] = day
 
     for company in remove:
-        # Creates a new file and stores the old data in the PastMentions folder
-        with open(f'./Files/PastMentios/{company}.json', 'w') as f:
-            json.dump(company_dict, f, sort_keys=True, indent=4, ensure_ascii=False)
+        # Adds the mention to the past_companies file
+        with open(f'./Files/past_companies.json', 'r') as f:
+            data = json.load(f)
+
+            data[company] = {}
+            data[company].update(company_dict[company])
+
+            json.dump(data, f, sort_keys=True, indent=4, ensure_ascii=False)
 
         del company_dict[company]
 
