@@ -103,7 +103,7 @@ def get_current_shares():
     company_dict = get_company_dict()
 
     gmt = datetime.now()
-    market_time = gmt.replace(hour=(gmt.hour - 5))
+    market_time = gmt.replace(hour=abs(gmt.hour - 5))
 
     # Ensure market is open (opening hours 9:30 - 4 EST)
     if int(str(market_time.hour) + str(market_time.minute if market_time.minute >= 10 else f'0{market_time.minute}')):
