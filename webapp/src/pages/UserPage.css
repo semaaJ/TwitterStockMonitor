@@ -1,0 +1,54 @@
+.companyMention {
+    color: var(--dk-gray-300);
+    padding-top: 4px;
+    padding-bottom: 4px;
+    width: 400px;
+}
+
+.left {
+    width: 1250px;
+    padding: 25px;
+}
+
+.card {
+    background: var(--primary-darker);
+    margin-left: 4px;
+    padding: 20px;
+    margin-right: 4px;
+    border-bottom: 1px solid var(--primary-light);
+}
+
+.mentions {
+    margin-top: 8px;
+    height: 180px;
+    overflow: scroll;
+}
+
+.company {
+    cursor: pointer;
+    color: var(--dk-gray-500);
+}
+
+.company:hover {
+    transition: 0.2s;
+    color: var(--dk-gray-300);
+}
+
+.icon {
+    width: 74px;
+    height: 180px;
+    background: var(--primary-darker);
+    cursor: pointer;
+    border-radius: 0px;
+    height: 100%;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    margin-right: 4px;
+}
+
+.icon:hover {
+    background: var(--primary-light);
+    transition: 0.3s;
+}
+
+

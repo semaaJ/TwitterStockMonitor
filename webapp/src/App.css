@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+:root {
+    --twitter-blue: rgb(29, 155, 240);
+
+    --primary-light: #6f6486;
+    --primary-dark: #313348;
+    --primary-darker: #2a2b3d;
+    --primary-pos: #c2ffc0;
+    --primary-neg: #ffbaba;
+
+    --white: #FFFFFF;
+    --greyLight-1: #E4EBF5;
+    --greyLight-2: #c8d0e7;
+    --greyLight-3: #bec8e4;
+    --greyDark: #9baacf;
+    
+    --dk-gray-100: #F3F4F6;
+    --dk-gray-200: #E5E7EB;
+    --dk-gray-300: #D1D5DB;
+    --dk-gray-400: #9CA3AF;
+    --dk-gray-500: #6B7280;
+    --dk-gray-600: #4B5563;
+    --dk-gray-700: #374151;
+    --dk-gray-800: #1F2937;
+    --dk-gray-900: #111827;
+}
+
+.App {
+    font-family: 'Open Sans';
+    width: 100%;
+    height: 100vh;
+    background: var(--primary-dark);
+}
+
+p {
+    color: var(--dk-gray-100);
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--dk-gray-100);
+}
+
+h2 {
+    font-size: 22px;
+    color: var(--dk-gray-200);
+}
+
+h3 {
+    font-size: 18px;
+    color: var(--dk-gray-400);
+}
+
+.selected { color: var(--dk-gray-100); }
+.pos { color: var(--primary-pos); }
+.neg { color: var(--primary-neg); }
+.primaryLight { color: var(--primary-light); }
+.primaryDark { color: var(--primary-dark); }
+.primaryDarker { color: var(--primary-darker); }
+
+
+.d-f { display: flex; }
+.fd-c { flex-direction: column; }
+.f-w { flex-wrap: wrap; }
+.f-g { flex-grow: 1 }
+
+.jc-c { justify-content: center; }
+.jc-sb { justify-content: space-between; }
+.jc-sa { justify-content: space-around; }
+
+.al-c { align-items: center; }
+
+.h-100 { height: 100%; }
+.w-100 { width: 100%; }
