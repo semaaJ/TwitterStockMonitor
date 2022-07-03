@@ -1,0 +1,29 @@
+.outer {
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.outer:hover {
+    transition: 0.3s;
+    background: var(--primary-light);
+}
+
+.user {
+    cursor: pointer;
+    padding: 14px;
+    background: linear-gradient(240deg, var(--primary-darker), var(--primary-darker) 70%, var(--primary-light) 0%, var(--primary-light));
+    height: 140px;
+}
+
+.subInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.userInfo {
+    padding-left: 20px;
+    width: 100%;
+}
+
+.userAvi { border: 4px solid var(--primary-light); }
